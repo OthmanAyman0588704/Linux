@@ -1,4 +1,3 @@
-cat << 'EOF' > systeminfo.sh
 #!/bin/bash
 # Systeminformationen
 
@@ -10,5 +9,3 @@ echo "Uptime:    $(uptime -p)"
 echo "============================"
 
 read -p "Fertig! Drücke ENTER zum Schließen..."
-EOF
-

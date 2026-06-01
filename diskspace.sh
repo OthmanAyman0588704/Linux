@@ -1,4 +1,3 @@
-cat << 'EOF' > diskspace.sh
 #!/bin/bash
 # Festplatten-Überwachung
 
@@ -14,5 +13,3 @@ else
 fi
 
 read -p "Fertig! Drücke ENTER zum Schließen..."
-EOF
-

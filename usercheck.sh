@@ -1,4 +1,3 @@
-cat << 'EOF' > usercheck.sh
 #!/bin/bash
 # Benutzer-Prüfung
 
@@ -17,5 +16,3 @@ else
 fi
 
 read -p "Fertig! Drücke ENTER zum Schließen..."
-EOF
-
