@@ -1,0 +1,4 @@
+=== INVENTAR: FIRMEN-SERVER ===
+Hostname: srv-web-01   | IP: 192.168.10.10 | Rolle: Webserver (Produktion)
+Hostname: srv-db-01    | IP: 192.168.10.11 | Rolle: Datenbank (MySQL)
+Hostname: srv-git-01   | IP: 192.168.10.12 | Rolle: Interner Git-Server
