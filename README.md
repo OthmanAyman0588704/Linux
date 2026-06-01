@@ -1,14 +1,15 @@
-# 🐧 Unser Linux-Wissenswiki
+# Admin-Toolkit
 
-Willkommen im Wiki der Klasse! Hier dokumentieren wir gemeinsam die wichtigsten Linux-Befehle und Konzepte.
+Eine Sammlung einfacher Bash-Skripte für administrative Aufgaben.
 
-## 🚀 Erste Schritte
-Um dieses Wiki lokal auf deinem PC zu bearbeiten, klone das Repository:
-`git clone <REPO_URL>`
+## Inhalt
+* `backup.sh`: Sichert Daten in ein komprimiertes Archiv.
+* `usercheck.sh`: Prüft die Existenz eines Systemnutzers.
+* `diskspace.sh`: Überprüft den freien Festplattenspeicher.
+* `systeminfo.sh`: Zeigt Statusinformationen des Systems.
 
-## 📁 Struktur des Wikis
-* `befehle.md` — Allgemeine Navigation und Dateiverwaltung
-* `benutzer.md` — Rechte und User-Management
-* `netzwerk.md` — IP-Adressen und Verbindungstests
-* `prozesse.md` — Task-Manager im Terminal
-* `skripte.md` — Automatisierung mit Bash
+## Nutzung
+Skripte müssen vor der Ausführung ausführbar gemacht werden:
+```bash
+chmod +x *.sh
+```
