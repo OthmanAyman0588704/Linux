@@ -1,3 +1,4 @@
+cat << 'EOF' > diskspace.sh
 #!/bin/bash
 # Festplatten-Überwachung
 
@@ -11,3 +12,7 @@ if [ "$USAGE" -gt "$LIMIT" ]; then
 else
     echo "Speicherplatz ist im grünen Bereich."
 fi
+
+read -p "Fertig! Drücke ENTER zum Schließen..."
+EOF
+

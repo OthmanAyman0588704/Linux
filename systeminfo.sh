@@ -1,3 +1,4 @@
+cat << 'EOF' > systeminfo.sh
 #!/bin/bash
 # Systeminformationen
 
@@ -7,3 +8,7 @@ echo "Betriebssystem: $(uname -o)"
 echo "Kernel:     $(uname -r)"
 echo "Uptime:    $(uptime -p)"
 echo "============================"
+
+read -p "Fertig! Drücke ENTER zum Schließen..."
+EOF
+
