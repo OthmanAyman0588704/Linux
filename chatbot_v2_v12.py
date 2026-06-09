@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🤖 JARVIS BOT v11.0 - KI erstellt automatisch Code-Dateien
+🤖 JARVIS CHATBOT v2_12 - KI erstellt automatisch Code-Dateien
 """
 
 import socket
