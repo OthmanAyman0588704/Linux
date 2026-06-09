@@ -1,3 +1,31 @@
+
+# ======================= SELBST-INSTALLATION =======================
+def install_python_package(package_name):
+    import subprocess, sys
+    print(f"⚠️  Benötige Python-Paket '{package_name}'")
+    if input("Darf ich es installieren? (y/n): ").lower() != 'y':
+        return False
+    try:
+        subprocess.run([sys.executable, "-m", "pip", "install", package_name], check=True)
+        print(f"✅ {package_name} installiert.")
+        return True
+    except Exception as e:
+        print(f"❌ Fehler: {e}")
+        return False
+
+def install_system_package(package_name):
+    import subprocess
+    print(f"📦 Systempaket '{package_name}' wird benötigt.")
+    if input(f"Mit 'sudo apt install {package_name}' installieren? (y/n): ").lower() != 'y':
+        return False
+    try:
+        subprocess.run(["sudo", "apt", "update"], check=True)
+        subprocess.run(["sudo", "apt", "install", "-y", package_name], check=True)
+        print(f"✅ {package_name} installiert.")
+        return True
+    except Exception as e:
+        print(f"❌ Fehler: {e}")
+        return False
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -22,6 +50,7 @@ import subprocess   # Ausführen von Shell-Befehlen (neu: erweiterte Systeminfos
 import re           # Reguläre Ausdrücke für Textverarbeitung
 import time         # Zeitfunktionen für Delays und Messungen
 from datetime import datetime  # Aktuelle Uhrzeit und Datum formatieren
+from zoneinfo import ZoneInfo  #Akutelle Uhrzeit und Datum der Zeitzone
 from pathlib import Path       # Moderner Dateipfad-Umgang (Python 3.4+)
 from typing import Dict, List, Optional, Tuple, Any  # Type Hints für bessere Code-Klarheit
 
@@ -820,6 +849,12 @@ def get_weather(city: str = "Berlin", lang: str = "de") -> str:
         target = geo_data["results"][0]
         lat = target["latitude"]
         lon = target["longitude"]
+
+        target = geo_data["results"][0]
+
+        lat = target["latitude"]
+        lon = target["longitude"]
+        timezone = target["timezone"]
         found_city = f"{target['name']} ({target.get('country', '')})"
 
         # Schritt 2: Wetterdaten abrufen
@@ -896,411 +931,36 @@ def get_time_info(lang: str = "de") -> str:
         )
 
 
-def get_help(lang: str = "de") -> str:
-    """
-    Zeigt alle verfügbaren Befehle und deren Beschreibung.
+    try:
+        city_encoded = urllib.parse.quote(city)
 
-    Args:
-        lang: "de" oder "en"
+        geo_url = (
+            f"{Config.GEO_API_BASE}?"
+            f"name={city_encoded}&count=1&language={lang}"
+        )
 
-    Returns:
-        Formatierter Hilfetext
-    """
-    if lang == "de":
+        with urllib.request.urlopen(geo_url, timeout=10) as response:
+            geo_data = json.loads(response.read().decode())
+
+        if not geo_data.get("results"):
+            return f"Stadt '{city}' nicht gefunden."
+
+        target = geo_data["results"][0]
+
+        city_name = target["name"]
+        country = target.get("country", "")
+        timezone = target["timezone"]
+
+        now = datetime.now(ZoneInfo(timezone))
+
         return (
-            "📖 **Verfügbare Befehle:**\n\n"
-            "  ⏰ **Zeit:** `zeit`, `uhr`, `uhrzeit`, `spät`\n"
-            "  🌐 **Netzwerk:** `ip`, `mac`, `dns`, `netzwerk`, `internet`, `ping`, `speedtest`\n"
-            "  🔌 **Hardware:** `hardware`, `specs`, `komponenten`, `geräte`\n"
-            "  🖥️ **System:** `cpu`, `ram`, `speicher`, `festplatte`, `auslastung`, `monitoring`\n"
-            "  💾 **Disks:** `disk_usage`, `partitionen`\n"
-            "  🔋 **Akku:** `battery`, `akku`, `laufzeit`\n"
-            "  ⚙️ **Prozesse:** `prozesse`, `top`, `tasks`\n"
-            "  👤 **Benutzer:** `users`, `benutzer`, `who`\n"
-            "  🔧 **Dienste:** `services`, `dienste`, `systemctl`\n"
-            "  🐳 **Docker:** `docker`, `container`\n"
-            "  🔌 **Ports:** `ports`, `offene ports`, `listening`\n"
-            "  🌍 **Umgebung:** `env`, `umgebung`, `variablen`\n"
-            "  🌤️ **Wetter:** `wetter`, `weather` (+ Stadtname)\n"
-            "  ❓ **Hilfe:** `help`, `hilfe`, `?`\n\n"
-            "  💡 **Beispiele:**\n"
-            "     • `wetter in München`\n"
-            "     • `wie ist die cpu auslastung`\n"
-            "     • `ping google.com`\n"
-            "     • `hw ist die temp rn` (Slang funktioniert!)\n\n"
-            "  🤖 Alles andere wird an die KI (Ollama) weitergeleitet!"
-        )
-    else:
-        return (
-            "📖 **Available Commands:**\n\n"
-            "  ⏰ **Time:** `time`, `clock`, `what time`\n"
-            "  🌐 **Network:** `ip`, `mac`, `dns`, `network`, `ping`, `speedtest`\n"
-            "  🔌 **Hardware:** `hardware`, `specs`, `components`\n"
-            "  🖥️ **System:** `cpu`, `ram`, `disk`, `space`, `monitoring`\n"
-            "  💾 **Disks:** `disk_usage`, `partitions`\n"
-            "  🔋 **Battery:** `battery`\n"
-            "  ⚙️ **Processes:** `processes`, `top`, `tasks`\n"
-            "  👤 **Users:** `users`, `who`\n"
-            "  🔧 **Services:** `services`\n"
-            "  🐳 **Docker:** `docker`, `containers`\n"
-            "  🔌 **Ports:** `ports`, `open ports`, `listening`\n"
-            "  🌍 **Environment:** `env`, `variables`\n"
-            "  🌤️ **Weather:** `weather` (+ city name)\n"
-            "  ❓ **Help:** `help`, `?`\n\n"
-            "  💡 **Examples:**\n"
-            "     • `weather in London`\n"
-            "     • `how is the cpu usage`\n"
-            "     • `ping 8.8.8.8`\n"
-            "     • `hw is the temp rn` (slang works!)\n\n"
-            "  🤖 Everything else is forwarded to the AI (Ollama)!"
+            f"🕐 Uhrzeit in {city_name} ({country})\n"
+            f"• Zeit: {now.strftime('%H:%M:%S')}\n"
+            f"• Datum: {now.strftime('%d.%m.%Y')}\n"
+            f"• Zeitzone: {timezone}"
         )
 
-
-# ══════════════════════════════════════════════════════════════════════════════
-# 6. BEFEHLSPARSER (Extrahiert Parameter aus Benutzereingaben)
-# ══════════════════════════════════════════════════════════════════════════════
-
-def extract_city(raw_input: str, input_lower: str) -> str:
-    """
-    Extrahiert den Städtenamen aus einer Wetter-Anfrage.
-
-    Unterstützt Formate wie:
-    - "wetter in München"
-    - "weather for London"
-    - "wetter berlin" (implizit)
-
-    Args:
-        raw_input: Original-Eingabe (mit Groß-/Kleinschreibung)
-        input_lower: Eingabe in Kleinbuchstaben
-
-    Returns:
-        Extrahierter Städtename oder Default-City
-    """
-    city = Config.DEFAULT_CITY
-
-    # Explizite Präpositionen
-    for separator in ["in ", "für ", "for ", "von ", "from "]:
-        if separator in input_lower:
-            city = raw_input.split(separator)[-1].strip("? .,;:!").strip()
-            break
-
-    # Fallback: Nimm das letzte Wort als Stadt (wenn nicht nur "wetter")
-    if city == Config.DEFAULT_CITY:
-        words = raw_input.split()
-        # Filtere bekannte Wetter-Keywords raus
-        weather_words = {
-            "weather", "wetter", "und", "and", "zeit", "time", "uhr",
-            "wie", "ist", "das", "the", "is", "in", "for", "what",
-            "how", "tell", "me", "about"
-        }
-        cleaned = [
-            w.strip("? .,;:!").strip() 
-            for w in words 
-            if w.lower() not in weather_words and len(w) > 2
-        ]
-        if cleaned:
-            city = " ".join(cleaned)
-
-    return city if city else Config.DEFAULT_CITY
-
-
-def extract_host(raw_input: str, input_lower: str) -> str:
-    """
-    Extrahiert den Host aus einer Ping-Anfrage.
-
-    Args:
-        raw_input: Original-Eingabe
-        input_lower: Eingabe in Kleinbuchstaben
-
-    Returns:
-        Extrahierter Hostname oder Default
-    """
-    words = raw_input.split()
-    if len(words) > 1:
-        # Letztes Wort als Host, außer es ist "ping" selbst
-        host = words[-1].strip("? .,;:!").strip()
-        if host.lower() != "ping":
-            return host
-    return "google.com"
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# 7. OLLAMA / KI-INTEGRATION
-# ══════════════════════════════════════════════════════════════════════════════
-
-def check_ollama_model(model: str) -> bool:
-    """
-    Prüft, ob ein Ollama-Modell lokal verfügbar ist.
-
-    Args:
-        model: Name des Modells (z.B. "gemma2:2b")
-
-    Returns:
-        True wenn verfügbar, False sonst
-    """
-    try:
-        models = ollama.list()
-        model_names = [m['model'] for m in models.get('models', [])]
-        return model in model_names
-    except Exception:
-        return False
-
-
-def get_available_model() -> str:
-    """
-    Ermittelt das beste verfügbare Ollama-Modell.
-
-    Returns:
-        Name des verfügbaren Modells
-    """
-    if check_ollama_model(Config.DEFAULT_MODEL):
-        return Config.DEFAULT_MODEL
-    if check_ollama_model(Config.FALLBACK_MODEL):
-        return Config.FALLBACK_MODEL
-
-    # Versuche, irgendein Modell zu finden
-    try:
-        models = ollama.list()
-        if models.get('models'):
-            return models['models'][0]['model']
-    except Exception:
-        pass
-
-    return Config.DEFAULT_MODEL  # Fallback, wird später Fehler werfen
-
-
-def ask_ollama(history: List[Dict[str, str]], user_input: str, lang: str = "de") -> str:
-    """
-    Sendet eine Anfrage an Ollama und gibt die Antwort zurück.
-
-    Args:
-        history: Bisherige Chat-Historie
-        user_input: Aktuelle Benutzereingabe
-        lang: Sprache für System-Prompt
-
-    Returns:
-        Antworttext des Modells
-    """
-    model = get_available_model()
-
-    # System-Prompt je nach Sprache
-    if lang == "de":
-        system_content = (
-            "Du bist ein hilfreicher bilingualer Linux-Assistent. "
-            "Antworte auf Deutsch, sei locker und benutze Emojis. "
-            "Du kennst dich mit Linux, Python, Netzwerken und Hardware aus."
-        )
-    else:
-        system_content = (
-            "You are a helpful bilingual Linux assistant. "
-            "Reply in English, be casual and use emojis. "
-            "You know Linux, Python, networking and hardware."
-        )
-
-    # Baue Nachrichten-Liste
-    messages = [{"role": "system", "content": system_content}]
-    messages.extend(history[-Config.MAX_HISTORY:])  # Nur letzte N Einträge
-    messages.append({"role": "user", "content": user_input})
-
-    try:
-        response = ollama.chat(model=model, messages=messages)
-        return response['message']['content']
     except Exception as e:
-        return f"❌ KI-Fehler / AI Error: {e}"
+        return f"Fehler: {e}"
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# 8. HAUPT-BOT-KLASSE (Orchestriert alle Funktionen)
-# ══════════════════════════════════════════════════════════════════════════════
-
-class HybridBot:
-    """
-    Hauptklasse des Bilingual Hybrid-AI Bots.
-
-    Verwaltet:
-    - Befehlserkennung und -ausführung
-    - Chat-Historie mit Ollama
-    - Spracherkennung
-    - Slang-Übersetzung
-    """
-
-    def __init__(self):
-        """Initialisiert den Bot mit leerer Historie."""
-        self.history: List[Dict[str, str]] = []
-        self.running = True
-
-    def print_banner(self):
-        """Zeigt den Start-Banner an."""
-        print("╔" + "═" * 62 + "╗")
-        print("║" + " " * 14 + "🚀 BILINGUAL HYBRID-AI BOT v2.0" + " " * 17 + "║")
-        print("║" + " " * 8 + "Erweitert, modular & vollständig kommentiert" + " " * 8 + "║")
-        print("║" + " " * 10 + "Befehle: 'help' oder 'hilfe' für Übersicht" + " " * 10 + "║")
-        print("╚" + "═" * 62 + "╝")
-
-    def process_command(self, raw_input: str, cleaned_input: str, lang: str) -> bool:
-        """
-        Verarbeitet einen erkannten Befehl und gibt True zurück wenn ausgeführt.
-
-        Args:
-            raw_input: Original-Eingabe
-            cleaned_input: Bereinigte Eingabe (Slang ersetzt)
-            lang: Erkannte Sprache
-
-        Returns:
-            True wenn ein Befehl ausgeführt wurde, False für KI-Modus
-        """
-        befehl_ausgefuehrt = False
-        input_lower = cleaned_input.lower()
-
-        # ─── 1. ZEIT / TIME ────────────────────────────────────────────────
-        if any(word in input_lower for word in ["time_info", "time", "clock", "spät", "spaet"]):
-            print(f"\n{Config.BOT_PREFIX}:\n{get_time_info(lang)}")
-            befehl_ausgefuehrt = True
-
-        # ─── 2. NETZWERK & IP ──────────────────────────────────────────────
-        if any(word in input_lower for word in ["network_info", "ip", "mac", "dns", "netzwerk", "internet"]):
-            print(f"\n{Config.BOT_PREFIX}:\n{get_network_info(lang)}")
-            befehl_ausgefuehrt = True
-
-        # ─── 3. HARDWARE SPECS ─────────────────────────────────────────────
-        if any(word in input_lower for word in ["hardware", "specs", "teile", "komponenten", "geraete", "geräte", "systeminfo"]):
-            print(f"\n{Config.BOT_PREFIX}:\n{get_hardware_specs(lang)}")
-            befehl_ausgefuehrt = True
-
-        # ─── 4. LIVE SYSTEM-AUSLASTUNG ─────────────────────────────────────
-        if any(word in input_lower for word in ["space", "ram", "cpu", "gpu", "monitoring", "traffic", "temp", "temperature", "speicher", "festplatte", "auslastung", "system_data"]):
-            print(f"\n{Config.BOT_PREFIX}:\n{get_system_data(lang)}")
-            befehl_ausgefuehrt = True
-
-        # ─── 5. DISK USAGE (alle Partitionen) ──────────────────────────────
-        if any(word in input_lower for word in ["disk_usage", "partitionen", "partitions"]):
-            print(f"\n{Config.BOT_PREFIX}:\n{get_disk_usage(lang)}")
-            befehl_ausgefuehrt = True
-
-        # ─── 6. BATTERIE / AKKU ────────────────────────────────────────────
-        if any(word in input_lower for word in ["battery", "akku", "laufzeit"]):
-            print(f"\n{Config.BOT_PREFIX}:\n{get_battery_info(lang)}")
-            befehl_ausgefuehrt = True
-
-        # ─── 7. PROZESSE ───────────────────────────────────────────────────
-        if any(word in input_lower for word in ["processes", "prozesse", "top", "tasks"]):
-            print(f"\n{Config.BOT_PREFIX}:\n{get_processes(lang)}")
-            befehl_ausgefuehrt = True
-
-        # ─── 8. BENUTZER ───────────────────────────────────────────────────
-        if any(word in input_lower for word in ["users", "benutzer", "who"]):
-            print(f"\n{Config.BOT_PREFIX}:\n{get_users(lang)}")
-            befehl_ausgefuehrt = True
-
-        # ─── 9. DIENSTE / SERVICES ─────────────────────────────────────────
-        if any(word in input_lower for word in ["services", "dienste", "systemctl"]):
-            print(f"\n{Config.BOT_PREFIX}:\n{get_services(lang)}")
-            befehl_ausgefuehrt = True
-
-        # ─── 10. DOCKER ────────────────────────────────────────────────────
-        if any(word in input_lower for word in ["docker", "container"]):
-            print(f"\n{Config.BOT_PREFIX}:\n{get_docker_info(lang)}")
-            befehl_ausgefuehrt = True
-
-        # ─── 11. OFFENE PORTS ──────────────────────────────────────────────
-        if any(word in input_lower for word in ["ports", "offene ports", "listening"]):
-            print(f"\n{Config.BOT_PREFIX}:\n{get_ports(lang)}")
-            befehl_ausgefuehrt = True
-
-        # ─── 12. UMGEBUNGSVARIABLEN ────────────────────────────────────────
-        if any(word in input_lower for word in ["environment", "env", "umgebung", "variablen"]):
-            print(f"\n{Config.BOT_PREFIX}:\n{get_environment(lang)}")
-            befehl_ausgefuehrt = True
-
-        # ─── 13. PING ──────────────────────────────────────────────────────
-        if "ping" in input_lower:
-            host = extract_host(raw_input, input_lower)
-            print(f"\n{Config.BOT_PREFIX}:\n{get_ping(host, lang)}")
-            befehl_ausgefuehrt = True
-
-        # ─── 14. SPEEDTEST ─────────────────────────────────────────────────
-        if any(word in input_lower for word in ["speedtest", "geschwindigkeit", "speed"]):
-            print(f"\n{Config.BOT_PREFIX}:\n{get_speedtest(lang)}")
-            befehl_ausgefuehrt = True
-
-        # ─── 15. WETTER ────────────────────────────────────────────────────
-        if any(word in input_lower for word in ["weather", "wetter"]):
-            city = extract_city(raw_input, input_lower)
-            print(f"\n⏳ Wetterdaten werden geladen / Loading weather data...")
-            print(f"\n{Config.BOT_PREFIX}:\n{get_weather(city, lang)}")
-            befehl_ausgefuehrt = True
-
-        # ─── 16. HILFE ─────────────────────────────────────────────────────
-        if any(word in input_lower for word in ["help", "hilfe", "?"]):
-            print(f"\n{Config.BOT_PREFIX}:\n{get_help(lang)}")
-            befehl_ausgefuehrt = True
-
-        return befehl_ausgefuehrt
-
-    def run(self):
-        """
-        Haupt-Event-Loop des Bots.
-        Liest Benutzereingaben, verarbeitet Befehle oder leitet an KI weiter.
-        """
-        self.print_banner()
-
-        while self.running:
-            try:
-                # ─── Eingabe lesen ─────────────────────────────────────────
-                raw_input = input("\n💬 You: ").strip()
-                if not raw_input:
-                    continue
-
-                input_lower = raw_input.lower()
-
-                # ─── Beenden ───────────────────────────────────────────────
-                if input_lower in ["bye", "exit", "quit", "tschüss", "ciao", "auf wiedersehen"]:
-                    print(f"\n{Config.BOT_PREFIX}: 👋 Tschüss! / Bye!")
-                    self.running = False
-                    break
-
-                # ─── Slang übersetzen & Sprache erkennen ───────────────────
-                cleaned_input = translate_slang(input_lower)
-                lang = detect_language(cleaned_input)
-
-                # ─── Befehl verarbeiten ────────────────────────────────────
-                if self.process_command(raw_input, cleaned_input, lang):
-                    continue
-
-                # ─── KI-Modus (Ollama) ─────────────────────────────────────
-                print(f"\n⏳ {Config.THINKING_MSG}")
-
-                response = ask_ollama(self.history, raw_input, lang)
-                print(f"\n{Config.BOT_PREFIX}:\n{response}")
-
-                # Historie aktualisieren (RAM-Schutz via MAX_HISTORY)
-                self.history.append({"role": "user", "content": raw_input})
-                self.history.append({"role": "assistant", "content": response})
-
-                # Alte Einträge entfernen wenn Limit überschritten
-                if len(self.history) > Config.MAX_HISTORY * 2:
-                    self.history = self.history[-Config.MAX_HISTORY * 2:]
-
-            except KeyboardInterrupt:
-                print(f"\n\n{Config.BOT_PREFIX}: 👋 Tschüss! / Bye!")
-                break
-            except EOFError:
-                print(f"\n\n{Config.BOT_PREFIX}: 👋 Tschüss! / Bye!")
-                break
-            except Exception as e:
-                print(f"\n❌ Unerwarteter Fehler / Unexpected Error: {e}")
-                # Bot läuft weiter statt zu beenden
-                continue
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# 9. PROGRAMMSTART
-# ══════════════════════════════════════════════════════════════════════════════
-
-if __name__ == "__main__":
-    """
-    Einstiegspunkt des Programms.
-    Erstellt eine Bot-Instanz und startet die Hauptschleife.
-    """
-    bot = HybridBot()
-    bot.run()
