@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🤖 JARVIS BOT v11.0 - Code wird automatisch gespeichert
+🤖 JARVIS BOT v11.0 - KI erstellt automatisch Code-Dateien
 """
 
 import socket
@@ -93,18 +93,21 @@ def ask_qwen(prompt):
 def generate_and_save_code(description):
     print("\n⏳ KI generiert Code...")
     
-    code = ask_qwen(f"Schreibe NUR den Python-Code. Keine Erklärungen. Keine Einleitungen. {description}")
+    # Code generieren
+    code = ask_qwen(f"Schreibe NUR den Python-Code. Keine Erklärungen. Keine Einleitungen. KEINE Markdown-Codeblöcke. KEINE Backticks. NUR den reinen Code. Keine Markdown-Codeblöcke. Keine Backticks. {description}")
     
     if code.startswith("❌"):
         print(code)
         return
     
+    # Code anzeigen
     print("\n" + "="*60)
     print("📝 GENERIERTER CODE:")
     print("="*60)
     print(code)
     print("="*60)
     
+    # Nach Dateinamen fragen
     print("\n💾 In welche Datei soll der Code gespeichert werden?")
     print("   (z.B. uhr.py oder mein_programm.py)")
     filename = input("📁 Dateiname: ").strip()
@@ -113,14 +116,17 @@ def generate_and_save_code(description):
         print("❌ Kein Dateiname eingegeben. Code nicht gespeichert.")
         return
     
+    # .py hinzufügen wenn fehlt
     if not filename.endswith(".py"):
         filename += ".py"
     
+    # Speichern
     try:
         with open(filename, "w") as f:
             f.write(code)
         print(f"\n✅ Code gespeichert als: {filename}")
         
+        # Fragen ob nano geöffnet werden soll
         print("\n📝 Mit nano bearbeiten? (j/n)")
         if input().lower() == "j":
             subprocess.run(["nano", filename])
@@ -144,7 +150,7 @@ print("="*60)
 print("  ip | mac | dns | uhrzeit | cpu | ram | gpu | netzlast")
 print("  code <beschreibung> | beliebige Fragen | pip | apt | bye")
 print("="*60)
-print("  ✨ Bei 'code' fragt der Bot nach Dateinamen")
+print("  ✨ NEU: Bei 'code' fragt der Bot nach Dateinamen")
 print("  ✨ und speichert den Code direkt in eine Datei!")
 print("="*60 + "\n")
 
@@ -158,6 +164,7 @@ while True:
             print("\n👋 Tschüss!\n")
             break
         
+        # Befehle
         if cmd == "ip":
             print(f"\n📡 IP: {get_ip()}\n")
         elif cmd == "mac":
@@ -175,7 +182,8 @@ while True:
         elif cmd == "netzlast":
             print(f"\n🌐 {get_netzlast()}\n")
         elif cmd.startswith("code "):
-            generate_and_save_code(cmd[5:])
+            description = cmd[5:]
+            generate_and_save_code(description)
         elif cmd.startswith("pip "):
             pip_install(cmd[4:])
             print(f"✅ {cmd[4:]} installiert\n")
