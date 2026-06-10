@@ -82,7 +82,7 @@ def ask_qwen(prompt):
     if not OLLAMA_OK:
         return "❌ ollama nicht installiert"
     try:
-        r = ollama.chat(model="qwen2.5-coder:1.5b", messages=[
+        r = ollama.chat(model="qwen2.5-coder:7b", messages=[
             {"role": "user", "content": prompt}
         ])
         return r['message']['content']
